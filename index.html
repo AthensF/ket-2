@@ -406,6 +406,7 @@
             display: flex;
             flex-direction: column;
             gap: 0;
+            position: relative;
         }
 
         .board-header-row {
@@ -526,6 +527,44 @@
         /* Enhanced hover state for drop zones only */
         .trello-cell.valid-drop-target .drop-zone:hover {
             background: rgba(107, 114, 128, 0.12);
+        }
+
+        /* Relationship indicators */
+        .relationship-indicator {
+            position: absolute;
+            top: 50%;
+            right: -14px;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4f46e5;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 3px 6px rgba(31, 41, 55, 0.6);
+        }
+
+        .relationship-indicator.hidden {
+            display: none;
+        }
+
+        .connections-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .connections-layer path {
+            fill: none;
+            stroke: rgba(99, 102, 241, 0.35);
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        .connections-layer circle {
+            fill: rgba(99, 102, 241, 0.55);
         }
 
         @media (max-width: 768px) {
@@ -758,7 +797,7 @@
                     </div>
                     <div class="trello-cell design-input" data-list="design-input">
                         <div class="cards-container">
-                            <div class="trello-card" draggable="true" data-card-id="fit-1">
+                            <div class="trello-card" draggable="true" data-card-id="fit-1" data-rq-id="FIT-1">
                                 <div class="test-case-header">
                                     <div class="test-case-left">
                                         <span class="test-case-badge badge-rq">RQ</span>
@@ -767,13 +806,14 @@
                                     <span class="test-case-id">FIT-1</span>
                                 </div>
                                 <div class="status-badge status-approved">Missing approval</div>
+                                <div class="relationship-indicator hidden"></div>
                             </div>
                             <div class="drop-zone"></div>
                         </div>
                     </div>
                     <div class="trello-cell validation" data-list="validation-test">
                         <div class="cards-container">
-                            <div class="trello-card" draggable="true" data-card-id="fit-5">
+                            <div class="trello-card" draggable="true" data-card-id="fit-5" data-parent-rq="FIT-1">
                                 <div class="test-case-header">
                                     <div class="test-case-left">
                                         <span class="test-case-badge badge-tc">TC</span>
@@ -783,7 +823,7 @@
                                 </div>
                                 <div class="status-badge status-manual">1 Manual Test Execution</div>
                             </div>
-                            <div class="trello-card" draggable="true" data-card-id="fit-6">
+                            <div class="trello-card" draggable="true" data-card-id="fit-6" data-parent-rq="FIT-1">
                                 <div class="test-case-header">
                                     <div class="test-case-left">
                                         <span class="test-case-badge badge-tc">TC</span>
@@ -807,7 +847,7 @@
                     </div>
                     <div class="trello-cell design-input" data-list="design-input">
                         <div class="cards-container">
-                            <div class="trello-card" draggable="true" data-card-id="fit-2">
+                            <div class="trello-card" draggable="true" data-card-id="fit-2" data-rq-id="FIT-2">
                                 <div class="test-case-header">
                                     <div class="test-case-left">
                                         <span class="test-case-badge badge-rq">RQ</span>
@@ -816,6 +856,7 @@
                                     <span class="test-case-id">FIT-2</span>
                                 </div>
                                 <div class="status-badge status-missing">Validation test case missing</div>
+                                <div class="relationship-indicator hidden"></div>
                             </div>
                             <div class="drop-zone"></div>
                         </div>
@@ -841,7 +882,7 @@
                     </div>
                     <div class="trello-cell validation" data-list="validation-test">
                         <div class="cards-container">
-                            <div class="trello-card" draggable="true" data-card-id="fit-3">
+                            <div class="trello-card" draggable="true" data-card-id="fit-3" data-parent-rq="FIT-2">
                                 <div class="test-case-header">
                                     <div class="test-case-left">
                                         <span class="test-case-badge badge-tc">TC</span>
@@ -851,7 +892,7 @@
                                 </div>
                                 <div class="status-badge status-manual">1 Manual Test Execution</div>
                             </div>
-                            <div class="trello-card" draggable="true" data-card-id="fit-4">
+                            <div class="trello-card" draggable="true" data-card-id="fit-4" data-parent-rq="FIT-2">
                                 <div class="test-case-header">
                                     <div class="test-case-left">
                                         <span class="test-case-badge badge-tc">TC</span>
@@ -865,6 +906,7 @@
                         </div>
                     </div>
                 </div>
+                <svg class="connections-layer" xmlns="http://www.w3.org/2000/svg"></svg>
             </div>
         </div>
             </div>
@@ -939,6 +981,7 @@
             // Remove highlighting from all drop targets
             highlightValidDropTargets(false);
             updateCardCounts();
+            refreshRelationships();
         }
 
         function highlightValidDropTargets(highlight) {
@@ -1035,27 +1078,55 @@
                     // Validate if this is a valid drop target
                     const cardBadge = draggedCard.querySelector('.test-case-badge');
                     const cardType = cardBadge ? cardBadge.textContent.trim() : '';
-                    const cellType = targetCell.getAttribute('data-list');
-                    
+                    let cellType = targetCell.getAttribute('data-list');
+
+                    // Redirect TC drops to the validation column within the same row
+                    if (cardType === 'TC' && cellType !== 'validation-test') {
+                        const targetRow = targetCell.closest('.trello-row');
+                        const validationCell = targetRow ? targetRow.querySelector('.trello-cell[data-list="validation-test"]') : null;
+                        if (validationCell) {
+                            const validationContainer = validationCell.querySelector('.cards-container');
+                            if (validationContainer) {
+                                targetCell = validationCell;
+                                targetContainer = validationContainer;
+                                cellType = 'validation-test';
+                            }
+                        }
+                    }
+
                     if (isValidDropTarget(cardType, cellType)) {
                         // Remove the card from its current position
                         draggedCard.remove();
-                        
+
                         // Insert the card in the new position
-                        if (this.classList.contains('drop-zone')) {
-                            targetContainer.insertBefore(draggedCard, this);
+                        const targetDropZone = targetContainer.querySelector('.drop-zone');
+                        if (targetDropZone) {
+                            targetContainer.insertBefore(draggedCard, targetDropZone);
                         } else {
-                            // Insert at the end before the drop zone
-                            const dropZone = targetContainer.querySelector('.drop-zone');
-                            targetContainer.insertBefore(draggedCard, dropZone);
+                            targetContainer.appendChild(draggedCard);
                         }
 
                         // Re-add event listeners
                         addCardEventListeners(draggedCard);
+
+                        // Update parent linkage for test cases
+                        if (cardType === 'TC') {
+                            const parentRow = targetCell.closest('.trello-row');
+                            if (parentRow) {
+                                const rowRqCard = parentRow.querySelector('.trello-card[data-rq-id]');
+                                if (rowRqCard) {
+                                    draggedCard.setAttribute('data-parent-rq', rowRqCard.getAttribute('data-rq-id'));
+                                } else {
+                                    draggedCard.removeAttribute('data-parent-rq');
+                                }
+                            }
+                        }
+
                         updateCardCounts();
-                        
+
                         // Update drop zone positions in all cells
                         updateAllDropZonePositions();
+                        refreshRelationships();
                     }
                     // If invalid drop target, card will snap back to original position
                 }
@@ -1080,11 +1151,92 @@
             });
         }
 
+        function updateRelationshipIndicators() {
+            const rqCards = document.querySelectorAll('.trello-card[data-rq-id]');
+            rqCards.forEach(rqCard => {
+                const note = rqCard.querySelector('.relationship-indicator');
+                if (!note) return;
+
+                const rqRow = rqCard.closest('.trello-row');
+                if (!rqRow) {
+                    note.classList.add('hidden');
+                    note.textContent = '';
+                    return;
+                }
+
+                const rqId = rqCard.getAttribute('data-rq-id');
+                const tcCards = Array.from(rqRow.querySelectorAll(`.trello-card[data-parent-rq="${rqId}"]`));
+
+                if (tcCards.length === 0) {
+                    note.classList.add('hidden');
+                    note.textContent = '';
+                } else {
+                    note.textContent = '';
+                    note.classList.remove('hidden');
+                }
+            });
+        }
+
+        function drawRelationshipConnections() {
+            const board = document.querySelector('.trello-board');
+            if (!board) return;
+
+            const layer = board.querySelector('.connections-layer');
+            if (!layer) return;
+
+            const boardRect = board.getBoundingClientRect();
+            layer.setAttribute('width', boardRect.width);
+            layer.setAttribute('height', boardRect.height);
+            layer.setAttribute('viewBox', `0 0 ${boardRect.width} ${boardRect.height}`);
+            layer.setAttribute('preserveAspectRatio', 'none');
+            layer.innerHTML = '';
+
+            const rqCards = board.querySelectorAll('.trello-card[data-rq-id]');
+            rqCards.forEach(rqCard => {
+                const rqRow = rqCard.closest('.trello-row');
+                if (!rqRow) return;
+
+                const rqId = rqCard.getAttribute('data-rq-id');
+                const tcCards = Array.from(rqRow.querySelectorAll(`.trello-card[data-parent-rq="${rqId}"]`));
+                if (tcCards.length === 0) return;
+
+                const rqRect = rqCard.getBoundingClientRect();
+                const startX = rqRect.right - boardRect.left;
+                const startY = rqRect.top + rqRect.height / 2 - boardRect.top;
+
+                tcCards.forEach(tcCard => {
+                    const tcRect = tcCard.getBoundingClientRect();
+                    const containerLeft = tcRect.left - boardRect.left;
+                    const endY = tcRect.top + tcRect.height / 2 - boardRect.top;
+
+                    const targetX = Math.max(containerLeft - 10, startX + 12);
+                    const midX = startX + Math.max((targetX - startX) * 0.6, 24);
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${targetX} ${endY}`);
+                    path.setAttribute('stroke-linejoin', 'round');
+                    layer.appendChild(path);
+
+                    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    dot.setAttribute('cx', targetX);
+                    dot.setAttribute('cy', endY);
+                    dot.setAttribute('r', 3);
+                    layer.appendChild(dot);
+                });
+            });
+        }
+
+        function refreshRelationships() {
+            updateRelationshipIndicators();
+            requestAnimationFrame(drawRelationshipConnections);
+        }
+
         // Initialize everything when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             initializeDragAndDrop();
             updateCardCounts();
             updateAllDropZonePositions();
+            refreshRelationships();
 
             // Make dropdowns functional
             const dropdowns = document.querySelectorAll('.dropdown');
@@ -1110,6 +1262,8 @@
                     console.log('Button clicked:', this.textContent);
                 });
             });
+
+            window.addEventListener('resize', refreshRelationships);
 
             // Add hover effects to test cases
             const testCases = document.querySelectorAll('.test-case');
