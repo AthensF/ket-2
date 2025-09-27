@@ -437,7 +437,6 @@
             background: #555555;
             min-height: 120px;
             border-bottom: 2px solid #666666;
-            margin-bottom: 8px;
         }
 
         .trello-row:first-child {
@@ -445,9 +444,6 @@
             padding-top: 0;
         }
 
-        .trello-row:last-child {
-            margin-bottom: 0;
-        }
 
         .trello-cell {
             background: #2a2a2a;
@@ -493,20 +489,43 @@
         }
 
         .drop-zone {
-            min-height: 40px;
+            min-height: 0;
+            height: 0;
             border: 2px dashed transparent;
             border-radius: 6px;
             transition: all 0.2s ease;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Show drop zone when dragging */
+        .dragging-active .drop-zone {
+            min-height: 50px;
+            height: auto;
             margin: 4px 0;
-            position: absolute;
-            bottom: 0;
-            left: 12px;
-            right: 12px;
+        }
+
+        /* Hide drop zone in the origin cell */
+        .origin-cell .drop-zone {
+            min-height: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
         }
 
         .drop-zone.drag-over {
             border-color: #8b5cf6;
             background: rgba(139, 92, 246, 0.1);
+        }
+
+        /* Only highlight the drop zone itself, not the entire column */
+        .trello-cell.valid-drop-target .drop-zone {
+            border-color: #6b7280;
+            background: rgba(107, 114, 128, 0.08);
+        }
+
+        /* Enhanced hover state for drop zones only */
+        .trello-cell.valid-drop-target .drop-zone:hover {
+            background: rgba(107, 114, 128, 0.12);
         }
 
         @media (max-width: 768px) {
@@ -891,12 +910,87 @@
             this.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/html', this.outerHTML);
+            
+            // Store the origin cell to exclude it from drop zones
+            const originCell = this.closest('.trello-cell');
+            if (originCell) {
+                originCell.classList.add('origin-cell');
+            }
+            
+            // Add dragging-active class to show drop zones
+            document.querySelector('.trello-board').classList.add('dragging-active');
+            
+            // Highlight all valid drop targets
+            highlightValidDropTargets(true);
         }
 
         function handleDragEnd(e) {
             this.classList.remove('dragging');
             draggedCard = null;
+            
+            // Remove origin-cell class from all cells
+            document.querySelectorAll('.origin-cell').forEach(cell => {
+                cell.classList.remove('origin-cell');
+            });
+            
+            // Remove dragging-active class to hide drop zones
+            document.querySelector('.trello-board').classList.remove('dragging-active');
+            
+            // Remove highlighting from all drop targets
+            highlightValidDropTargets(false);
             updateCardCounts();
+        }
+
+        function highlightValidDropTargets(highlight) {
+            const allCells = document.querySelectorAll('.trello-cell');
+            
+            allCells.forEach(cell => {
+                if (highlight && draggedCard) {
+                    // Determine card type from the badge
+                    const cardBadge = draggedCard.querySelector('.test-case-badge');
+                    const cardType = cardBadge ? cardBadge.textContent.trim() : '';
+                    
+                    // Check if this cell is a valid drop target for this card type
+                    const cellType = cell.getAttribute('data-list');
+                    const isValidTarget = isValidDropTarget(cardType, cellType);
+                    
+                    if (isValidTarget) {
+                        cell.classList.add('valid-drop-target');
+                        updateDropZonePosition(cell);
+                    }
+                } else {
+                    // Remove highlighting from all cells
+                    cell.classList.remove('valid-drop-target');
+                }
+            });
+        }
+
+        function updateDropZonePosition(cell) {
+            const container = cell.querySelector('.cards-container');
+            const dropZone = container.querySelector('.drop-zone');
+            const cards = container.querySelectorAll('.trello-card');
+            
+            // Move drop zone to the end (after all cards)
+            if (dropZone && cards.length > 0) {
+                container.appendChild(dropZone);
+            }
+        }
+
+        function isValidDropTarget(cardType, cellType) {
+            // TC (Test Cases) can only go in validation-test columns
+            if (cardType === 'TC') {
+                return cellType === 'validation-test';
+            }
+            // RQ (Requirements) can only go in design-input columns
+            else if (cardType === 'RQ') {
+                return cellType === 'design-input';
+            }
+            // Use cases column accepts any type
+            else if (cellType === 'use-cases') {
+                return true;
+            }
+            
+            return false;
         }
 
         function handleDragOver(e) {
@@ -927,30 +1021,52 @@
             if (draggedCard) {
                 // Find the target container
                 let targetContainer;
+                let targetCell;
+                
                 if (this.classList.contains('drop-zone')) {
                     targetContainer = this.parentElement;
+                    targetCell = targetContainer.parentElement;
                 } else if (this.classList.contains('cards-container')) {
                     targetContainer = this;
+                    targetCell = targetContainer.parentElement;
                 }
 
-                if (targetContainer) {
-                    // Remove the card from its current position
-                    draggedCard.remove();
+                if (targetContainer && targetCell) {
+                    // Validate if this is a valid drop target
+                    const cardBadge = draggedCard.querySelector('.test-case-badge');
+                    const cardType = cardBadge ? cardBadge.textContent.trim() : '';
+                    const cellType = targetCell.getAttribute('data-list');
                     
-                    // Insert the card in the new position
-                    if (this.classList.contains('drop-zone')) {
-                        targetContainer.insertBefore(draggedCard, this);
-                    } else {
-                        // Insert at the end before the drop zone
-                        const dropZone = targetContainer.querySelector('.drop-zone');
-                        targetContainer.insertBefore(draggedCard, dropZone);
-                    }
+                    if (isValidDropTarget(cardType, cellType)) {
+                        // Remove the card from its current position
+                        draggedCard.remove();
+                        
+                        // Insert the card in the new position
+                        if (this.classList.contains('drop-zone')) {
+                            targetContainer.insertBefore(draggedCard, this);
+                        } else {
+                            // Insert at the end before the drop zone
+                            const dropZone = targetContainer.querySelector('.drop-zone');
+                            targetContainer.insertBefore(draggedCard, dropZone);
+                        }
 
-                    // Re-add event listeners
-                    addCardEventListeners(draggedCard);
-                    updateCardCounts();
+                        // Re-add event listeners
+                        addCardEventListeners(draggedCard);
+                        updateCardCounts();
+                        
+                        // Update drop zone positions in all cells
+                        updateAllDropZonePositions();
+                    }
+                    // If invalid drop target, card will snap back to original position
                 }
             }
+        }
+
+        function updateAllDropZonePositions() {
+            const allCells = document.querySelectorAll('.trello-cell');
+            allCells.forEach(cell => {
+                updateDropZonePosition(cell);
+            });
         }
 
         function updateCardCounts() {
@@ -958,7 +1074,9 @@
             columns.forEach(column => {
                 const cards = column.querySelectorAll('.trello-card');
                 const countElement = column.querySelector('.card-count');
-                countElement.textContent = cards.length;
+                if (countElement) {
+                    countElement.textContent = cards.length;
+                }
             });
         }
 
@@ -966,6 +1084,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeDragAndDrop();
             updateCardCounts();
+            updateAllDropZonePositions();
 
             // Make dropdowns functional
             const dropdowns = document.querySelectorAll('.dropdown');
