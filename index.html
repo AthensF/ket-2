@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traceability Matrix - Ketryx</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #1a1a1a;
+            color: #e5e5e5;
+            line-height: 1.4;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: #2a2a2a;
+            border-right: 1px solid #404040;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid #404040;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .sidebar-nav {
+            padding: 12px 0;
+        }
+
+        .nav-section {
+            margin-bottom: 16px;
+        }
+
+        .nav-section-title {
+            padding: 6px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            color: #b5b5b5;
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: #3a3a3a;
+            color: #ffffff;
+        }
+
+        .nav-item-active {
+            background: #3a3a3a;
+            color: #ffffff;
+            border-right: 3px solid #8b5cf6;
+        }
+
+        .nav-item svg {
+            width: 16px;
+            height: 16px;
+            opacity: 0.7;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-x: auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 12px;
+        }
+
+        .header {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            border: 1px solid #404040;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .dropdown {
+            padding: 8px 12px;
+            border: 1px solid #555555;
+            border-radius: 6px;
+            background: #3a3a3a;
+            color: #e5e5e5;
+            font-size: 14px;
+            min-width: 120px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #555555;
+            border-radius: 6px;
+            background: #3a3a3a;
+            color: #e5e5e5;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #4a4a4a;
+        }
+
+        .search-input {
+            padding: 8px 12px;
+            border: 1px solid #555555;
+            border-radius: 6px;
+            background: #3a3a3a;
+            color: #e5e5e5;
+            font-size: 14px;
+            min-width: 200px;
+        }
+
+        .stats-section {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #404040;
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .stats-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #b5b5b5;
+        }
+
+        .total-rows {
+            font-size: 14px;
+            color: #9ca3af;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 8px;
+        }
+
+        .stat-card {
+            background: #3a3a3a;
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 70px;
+            border: 1px solid #555555;
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 6px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #e5e5e5;
+        }
+
+        .stat-percentage {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .stat-percentage.success {
+            color: #059669;
+        }
+
+        .stat-percentage.warning {
+            color: #d97706;
+        }
+
+        .stat-percentage.error {
+            color: #dc2626;
+        }
+
+        .stat-description {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .matrix-container {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            border: 1px solid #404040;
+        }
+
+        .matrix-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .showing-info {
+            font-size: 14px;
+            color: #9ca3af;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #9ca3af;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .matrix-table th {
+            background: #3a3a3a;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            color: #e5e5e5;
+            border-bottom: 2px solid #555555;
+        }
+
+        .matrix-table td {
+            padding: 0;
+            vertical-align: top;
+            border-bottom: 1px solid #555555;
+        }
+
+        .cell-content {
+            padding: 12px;
+            min-height: 100px;
+        }
+
+        .test-case {
+            background: #2b2b2b;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 6px;
+            border-left: 3px solid #8b5cf6;
+            border: 1px solid #666666;
+        }
+
+        .test-case:last-child {
+            margin-bottom: 0;
+        }
+
+        .test-case-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            gap: 8px;
+        }
+
+        .test-case-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .test-case-badge {
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-rq {
+            background: #003877;
+        }
+
+        .badge-tc {
+            background: #4b0e9e;
+        }
+
+        .test-case-id {
+            color: #3b82f6;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .test-case-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #e5e5e5;
+            margin-bottom: 6px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-missing {
+            background: #740238;
+            color: #e9d5ff;
+        }
+
+        .status-approved {
+            background: #594500;
+            color: #fed7aa;
+        }
+
+        .alert-row {
+            background: #740238;
+            color: #e9d5ff;
+        }
+
+        .alert-content {
+            padding: 2px 2px 2px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-text {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .empty-cell {
+            background: #2a2a2a;
+        }
+
+        .design-input-cell {
+            background: #383838;
+        }
+
+        .validation-cell {
+            background: #2a2a3a;
+        }
+
+        @media (max-width: 768px) {
+            .app-layout {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .container {
+                padding: 12px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .matrix-table {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L2 7v10c0 5.55 3.84 9.95 9 11 5.16-1.05 9-5.45 9-11V7l-10-5z"/>
+                    </svg>
+                    <span>Ketryx</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <a href="#" class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8z"/>
+                        </svg>
+                        <span>All Items</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z"/>
+                        </svg>
+                        <span>Releases</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">DESIGN</div>
+                    <a href="#" class="nav-item nav-item-active">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M1.5 2A1.5 1.5 0 0 1 3 .5h10A1.5 1.5 0 0 1 14.5 2v12a1.5 1.5 0 0 1-1.5 1.5H3A1.5 1.5 0 0 1 1.5 14V2z"/>
+                        </svg>
+                        <span>Traceability</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"/>
+                        </svg>
+                        <span>Graph</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z"/>
+                        </svg>
+                        <span>Risks</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M10.067.87a2.89 2.89 0 0 0-4.134 0l-.622.638-.89-.011a2.89 2.89 0 0 0-2.924 2.924l.01.89-.636.622a2.89 2.89 0 0 0 0 4.134l.637.622-.011.89a2.89 2.89 0 0 0 2.924 2.924l.89-.01.622.636a2.89 2.89 0 0 0 4.134 0l.622-.637.89.011a2.89 2.89 0 0 0 2.924-2.924l-.01-.89.636-.622a2.89 2.89 0 0 0 0-4.134l-.637-.622.011-.89a2.89 2.89 0 0 0-2.924-2.924l-.89.01-.622-.636z"/>
+                        </svg>
+                        <span>Risk controls</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">VERIFICATION & VALIDATION</div>
+                    <a href="#" class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                        </svg>
+                        <span>Tests</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M1.5 0A1.5 1.5 0 0 0 0 1.5v13A1.5 1.5 0 0 0 1.5 16h13a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 14.5 0h-13z"/>
+                        </svg>
+                        <span>History</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">CONFIGURATION</div>
+                    <a href="#" class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+                        </svg>
+                        <span>SBOM</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0h13A1.5 1.5 0 0 1 16 1.5v13a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13z"/>
+                        </svg>
+                        <span>Documents</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+                        </svg>
+                        <span>Settings</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>Traceability matrix</h1>
+            <div class="controls">
+                <select class="dropdown">
+                    <option>Current version</option>
+                </select>
+                <select class="dropdown">
+                    <option>Default</option>
+                </select>
+                <button class="btn">Download ↓</button>
+                <input type="search" class="search-input" placeholder="Search...">
+            </div>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="stats-section">
+            <div class="stats-header">
+                <div class="stats-title">Traceability check for Current version</div>
+                <div class="total-rows">Total rows: <strong>2</strong></div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Use cases</span>
+                        <span class="stat-percentage success">100%</span>
+                    </div>
+                    <div class="stat-description">Covered by design input</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Validation</span>
+                        <span class="stat-percentage warning">50%</span>
+                    </div>
+                    <div class="stat-description">Design inputs covered by tests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Test executions</span>
+                        <span class="stat-percentage error">0%</span>
+                    </div>
+                    <div class="stat-description">Created within test plan</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Failing tests</span>
+                        <span class="stat-percentage success">0%</span>
+                    </div>
+                    <div class="stat-description">Within test plan</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Controlled</span>
+                        <span class="stat-percentage error">0%</span>
+                    </div>
+                    <div class="stat-description">Items fully approved</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Matrix Table -->
+        <div class="matrix-container">
+            <div class="matrix-header">
+                <div class="showing-info">Showing 3 rows</div>
+                <div class="pagination">
+                    Rows: 50 ▼ &nbsp;&nbsp;&nbsp; 1 - 3 of 3 &nbsp; ‹ ›
+                </div>
+            </div>
+
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th style="width: 33.33%;">Use cases</th>
+                        <th style="width: 33.33%;">Design input</th>
+                        <th style="width: 33.33%;">Validation test</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Row 1: Test Cases without execution -->
+                    <tr>
+                        <td class="empty-cell">
+                            <div class="cell-content"></div>
+                        </td>
+                        <td class="design-input-cell">
+                            <div class="cell-content">
+                                <div class="test-case">
+                                    <div class="test-case-header">
+                                        <div class="test-case-left">
+                                            <span class="test-case-badge badge-rq">RQ</span>
+                                            <div class="test-case-title">Ensure fit of device on paws</div>
+                                        </div>
+                                        <span class="test-case-id">FIT-1</span>
+                                    </div>
+                                    <div class="status-badge status-approved">Missing approval</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="validation-cell">
+                            <div class="cell-content">
+                                <div class="test-case">
+                                    <div class="test-case-header">
+                                        <div class="test-case-left">
+                                            <span class="test-case-badge badge-tc">TC</span>
+                                            <div class="test-case-title">Measure heart rate at rest</div>
+                                        </div>
+                                        <span class="test-case-id">FIT-3</span>
+                                    </div>
+                                    <div class="status-badge status-missing">Test execution missing</div>
+                                </div>
+                                <div class="test-case">
+                                    <div class="test-case-header">
+                                        <div class="test-case-left">
+                                            <span class="test-case-badge badge-tc">TC</span>
+                                            <div class="test-case-title">Measure heart rate at running</div>
+                                        </div>
+                                        <span class="test-case-id">FIT-4</span>
+                                    </div>
+                                    <div class="status-badge status-missing">Test execution missing</div>
+                                </div>
+                                <div class="test-case">
+                                    <div class="test-case-header">
+                                        <div class="test-case-left">
+                                            <span class="test-case-badge badge-tc">TC</span>
+                                            <div class="test-case-title">Fits on large paws</div>
+                                        </div>
+                                        <span class="test-case-id">FIT-5</span>
+                                    </div>
+                                    <div class="status-badge status-missing">Test execution missing</div>
+                                </div>
+                                <div class="test-case">
+                                    <div class="test-case-header">
+                                        <div class="test-case-left">
+                                            <span class="test-case-badge badge-tc">TC</span>
+                                            <div class="test-case-title">Fits on small paws</div>
+                                        </div>
+                                        <span class="test-case-id">FIT-6</span>
+                                    </div>
+                                    <div class="status-badge status-missing">Test execution missing</div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Alert Row -->
+                    <tr class="alert-row">
+                        <td colspan="3">
+                            <div class="alert-content">
+                                <span class="alert-text">2 Test Cases without a test execution.</span>
+                                <button class="btn" style="border: none; background: transparent; color: inherit;">⚙</button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Row 2: Ensure fit of device on paws -->
+                    <tr>
+                        <td class="empty-cell">
+                            <div class="cell-content"></div>
+                        </td>
+                        <td class="design-input-cell">
+                            <div class="cell-content">
+                                <div class="test-case">
+                                    <div class="test-case-header">
+                                        <div class="test-case-left">
+                                            <span class="test-case-badge badge-rq">RQ</span>
+                                            <div class="test-case-title">Ensure fit of device on paws</div>
+                                        </div>
+                                        <span class="test-case-id">FIT-1</span>
+                                    </div>
+                                    <div class="status-badge status-approved">Missing approval</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="validation-cell">
+                            <div class="cell-content">
+                                <div class="test-case">
+                                    <div class="test-case-header">
+                                        <div class="test-case-left">
+                                            <span class="test-case-badge badge-tc">TC</span>
+                                            <div class="test-case-title">Fits on large paws</div>
+                                        </div>
+                                        <span class="test-case-id">FIT-5</span>
+                                    </div>
+                                    <div class="status-badge status-missing">Test execution missing</div>
+                                </div>
+                                <div class="test-case">
+                                    <div class="test-case-header">
+                                        <div class="test-case-left">
+                                            <span class="test-case-badge badge-tc">TC</span>
+                                            <div class="test-case-title">Fits on small paws</div>
+                                        </div>
+                                        <span class="test-case-id">FIT-6</span>
+                                    </div>
+                                    <div class="status-badge status-missing">Test execution missing</div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Alert Row 2 -->
+                    <tr class="alert-row">
+                        <td colspan="3">
+                            <div class="alert-content">
+                                <span class="alert-text">2 Test Cases without a test execution. 1 Item not fully approved yet.</span>
+                                <button class="btn" style="border: none; background: transparent; color: inherit;">⚙</button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Row 3: Measure heart rate of user -->
+                    <tr>
+                        <td class="empty-cell">
+                            <div class="cell-content"></div>
+                        </td>
+                        <td class="design-input-cell">
+                            <div class="cell-content">
+                                <div class="test-case">
+                                    <div class="test-case-header">
+                                        <div class="test-case-left">
+                                            <span class="test-case-badge badge-rq">RQ</span>
+                                            <div class="test-case-title">Measure heart rate of user</div>
+                                        </div>
+                                        <span class="test-case-id">FIT-2</span>
+                                    </div>
+                                    <div class="status-badge status-missing">Validation test case missing</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="empty-cell">
+                            <div class="cell-content"></div>
+                        </td>
+                    </tr>
+
+                    <!-- Final Alert Row -->
+                    <tr class="alert-row">
+                        <td colspan="3">
+                            <div class="alert-content">
+                                <span class="alert-text">1 Design input not covered by a validation test.</span>
+                                <button class="btn" style="border: none; background: transparent; color: inherit;">⚙</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="matrix-header" style="margin-top: 20px; margin-bottom: 0;">
+                <div class="showing-info">Showing 3 rows</div>
+                <div class="pagination">
+                    Rows: 50 ▼ &nbsp;&nbsp;&nbsp; 1 - 3 of 3 &nbsp; ‹ ›
+                </div>
+            </div>
+        </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Simple interactive functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Make dropdowns functional
+            const dropdowns = document.querySelectorAll('.dropdown');
+            dropdowns.forEach(dropdown => {
+                dropdown.addEventListener('change', function() {
+                    console.log('Dropdown changed:', this.value);
+                });
+            });
+
+            // Make search functional
+            const searchInput = document.querySelector('.search-input');
+            searchInput.addEventListener('input', function() {
+                console.log('Search:', this.value);
+                // In a real app, this would filter the table
+            });
+
+            // Make buttons functional
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    console.log('Button clicked:', this.textContent);
+                });
+            });
+
+            // Add hover effects to test cases
+            const testCases = document.querySelectorAll('.test-case');
+            testCases.forEach(testCase => {
+                testCase.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-1px)';
+                    this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                    this.style.transition = 'all 0.2s ease';
+                });
+                
+                testCase.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+
+            // Make stat cards clickable
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards.forEach(card => {
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', function() {
+                    const label = this.querySelector('.stat-label').textContent;
+                    console.log('Stat card clicked:', label);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
