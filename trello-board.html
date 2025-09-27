@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family in Hong Kong | Trello Board</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0079bf 0%, #005a8b 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #172b4d;
+        }
+
+        .board-header {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .board-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .board-container {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            min-height: calc(100vh - 140px);
+        }
+
+        .list {
+            background: #ebecf0;
+            border-radius: 8px;
+            width: 280px;
+            min-width: 280px;
+            max-height: fit-content;
+            padding: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .list-header {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+        }
+
+        .list-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #172b4d;
+            margin: 0;
+        }
+
+        .cards-container {
+            min-height: 20px;
+            padding: 4px 0;
+        }
+
+        .card {
+            background: white;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            cursor: grab;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .card.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+            transform: rotate(5deg);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #172b4d;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .card-label {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .label-green {
+            background: #61bd4f;
+        }
+
+        .label-blue {
+            background: #0079bf;
+        }
+
+        .label-orange {
+            background: #ff9f1a;
+        }
+
+        .label-red {
+            background: #eb5a46;
+        }
+
+        .label-purple {
+            background: #c377e0;
+        }
+
+        .add-card-btn {
+            width: 100%;
+            padding: 8px 12px;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            color: #5e6c84;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-card-btn:hover {
+            background: #ddd;
+            color: #172b4d;
+        }
+
+        .drop-zone {
+            min-height: 40px;
+            border: 2px dashed transparent;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #0079bf;
+            background: rgba(0, 121, 191, 0.1);
+        }
+
+        .add-list-btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: none;
+            border-radius: 8px;
+            width: 280px;
+            min-width: 280px;
+            padding: 12px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .add-list-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .board-container {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .list, .add-list-btn {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="board-header">
+        <h1 class="board-title">Family in Hong Kong</h1>
+    </div>
+
+    <div class="board-container" id="boardContainer">
+        <!-- Inbox List -->
+        <div class="list" data-list-id="inbox">
+            <div class="list-header">
+                <h2 class="list-title">Inbox</h2>
+            </div>
+            <div class="cards-container" data-list="inbox">
+                <div class="drop-zone"></div>
+            </div>
+            <button class="add-card-btn" onclick="addCard('inbox')">
+                <span>+</span> Add a card
+            </button>
+        </div>
+
+        <!-- To Praise List -->
+        <div class="list" data-list-id="to-praise">
+            <div class="list-header">
+                <h2 class="list-title">To Praise</h2>
+            </div>
+            <div class="cards-container" data-list="to-praise">
+                <div class="card" draggable="true" data-card-id="1">
+                    <div class="card-label label-green">Fatmum</div>
+                    <h3 class="card-title">Her comedy</h3>
+                </div>
+                <div class="card" draggable="true" data-card-id="2">
+                    <div class="card-label label-green">Fatmum</div>
+                    <h3 class="card-title">Follow God</h3>
+                </div>
+                <div class="drop-zone"></div>
+            </div>
+            <button class="add-card-btn" onclick="addCard('to-praise')">
+                <span>+</span> Add a card
+            </button>
+        </div>
+
+        <!-- To Do List -->
+        <div class="list" data-list-id="to-do">
+            <div class="list-header">
+                <h2 class="list-title">To Do</h2>
+            </div>
+            <div class="cards-container" data-list="to-do">
+                <div class="card" draggable="true" data-card-id="3">
+                    <div class="card-label label-green">Fatmum</div>
+                    <h3 class="card-title">Health and energy to enjoy life</h3>
+                </div>
+                <div class="drop-zone"></div>
+            </div>
+            <button class="add-card-btn" onclick="addCard('to-do')">
+                <span>+</span> Add a card
+            </button>
+        </div>
+
+        <!-- In Progress List -->
+        <div class="list" data-list-id="in-progress">
+            <div class="list-header">
+                <h2 class="list-title">In Progress</h2>
+            </div>
+            <div class="cards-container" data-list="in-progress">
+                <div class="drop-zone"></div>
+            </div>
+            <button class="add-card-btn" onclick="addCard('in-progress')">
+                <span>+</span> Add a card
+            </button>
+        </div>
+
+        <!-- Done List -->
+        <div class="list" data-list-id="done">
+            <div class="list-header">
+                <h2 class="list-title">Done</h2>
+            </div>
+            <div class="cards-container" data-list="done">
+                <div class="drop-zone"></div>
+            </div>
+            <button class="add-card-btn" onclick="addCard('done')">
+                <span>+</span> Add a card
+            </button>
+        </div>
+
+        <!-- Add List Button -->
+        <button class="add-list-btn" onclick="addList()">
+            <span>+</span> Add another list
+        </button>
+    </div>
+
+    <script>
+        let draggedCard = null;
+        let cardIdCounter = 4;
+
+        // Initialize drag and drop
+        function initializeDragAndDrop() {
+            const cards = document.querySelectorAll('.card');
+            const dropZones = document.querySelectorAll('.drop-zone');
+            const cardsContainers = document.querySelectorAll('.cards-container');
+
+            // Add event listeners to existing cards
+            cards.forEach(card => {
+                addCardEventListeners(card);
+            });
+
+            // Add event listeners to drop zones
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('drop', handleDrop);
+                zone.addEventListener('dragenter', handleDragEnter);
+                zone.addEventListener('dragleave', handleDragLeave);
+            });
+
+            // Add event listeners to cards containers
+            cardsContainers.forEach(container => {
+                container.addEventListener('dragover', handleDragOver);
+                container.addEventListener('drop', handleDrop);
+            });
+        }
+
+        function addCardEventListeners(card) {
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('dragend', handleDragEnd);
+        }
+
+        function handleDragStart(e) {
+            draggedCard = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.outerHTML);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            draggedCard = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            if (this.classList.contains('drop-zone')) {
+                this.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            if (this.classList.contains('drop-zone')) {
+                this.classList.remove('drag-over');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            
+            if (this.classList.contains('drop-zone')) {
+                this.classList.remove('drag-over');
+            }
+
+            if (draggedCard) {
+                // Find the target container
+                let targetContainer;
+                if (this.classList.contains('drop-zone')) {
+                    targetContainer = this.parentElement;
+                } else if (this.classList.contains('cards-container')) {
+                    targetContainer = this;
+                }
+
+                if (targetContainer) {
+                    // Remove the card from its current position
+                    draggedCard.remove();
+                    
+                    // Insert the card in the new position
+                    if (this.classList.contains('drop-zone')) {
+                        targetContainer.insertBefore(draggedCard, this);
+                    } else {
+                        // Insert at the end before the drop zone
+                        const dropZone = targetContainer.querySelector('.drop-zone');
+                        targetContainer.insertBefore(draggedCard, dropZone);
+                    }
+
+                    // Re-add event listeners
+                    addCardEventListeners(draggedCard);
+                }
+            }
+        }
+
+        function addCard(listId) {
+            const title = prompt('Enter card title:');
+            if (!title) return;
+
+            const label = prompt('Enter label (optional):') || 'General';
+            const labelColors = ['green', 'blue', 'orange', 'red', 'purple'];
+            const randomColor = labelColors[Math.floor(Math.random() * labelColors.length)];
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.draggable = true;
+            card.setAttribute('data-card-id', cardIdCounter++);
+            
+            card.innerHTML = `
+                <div class="card-label label-${randomColor}">${label}</div>
+                <h3 class="card-title">${title}</h3>
+            `;
+
+            const container = document.querySelector(`[data-list="${listId}"]`);
+            const dropZone = container.querySelector('.drop-zone');
+            container.insertBefore(card, dropZone);
+
+            addCardEventListeners(card);
+        }
+
+        function addList() {
+            const title = prompt('Enter list title:');
+            if (!title) return;
+
+            const listId = title.toLowerCase().replace(/\s+/g, '-');
+            const boardContainer = document.getElementById('boardContainer');
+            const addListBtn = document.querySelector('.add-list-btn');
+
+            const list = document.createElement('div');
+            list.className = 'list';
+            list.setAttribute('data-list-id', listId);
+            
+            list.innerHTML = `
+                <div class="list-header">
+                    <h2 class="list-title">${title}</h2>
+                </div>
+                <div class="cards-container" data-list="${listId}">
+                    <div class="drop-zone"></div>
+                </div>
+                <button class="add-card-btn" onclick="addCard('${listId}')">
+                    <span>+</span> Add a card
+                </button>
+            `;
+
+            boardContainer.insertBefore(list, addListBtn);
+
+            // Add event listeners to the new drop zone
+            const newDropZone = list.querySelector('.drop-zone');
+            const newContainer = list.querySelector('.cards-container');
+            
+            newDropZone.addEventListener('dragover', handleDragOver);
+            newDropZone.addEventListener('drop', handleDrop);
+            newDropZone.addEventListener('dragenter', handleDragEnter);
+            newDropZone.addEventListener('dragleave', handleDragLeave);
+            
+            newContainer.addEventListener('dragover', handleDragOver);
+            newContainer.addEventListener('drop', handleDrop);
+        }
+
+        // Initialize the board
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDragAndDrop();
+        });
+    </script>
+</body>
+</html>

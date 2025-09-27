@@ -401,7 +401,124 @@
             background: #2a2a3a;
         }
 
+        /* Trello Board Styles - Horizontal Layout */
+        .trello-board {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .board-header-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1px;
+            background: #555555;
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+
+        .column-header {
+            background: #3a3a3a;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .column-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #e5e5e5;
+            margin: 0;
+        }
+
+        .trello-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1px;
+            background: #555555;
+            min-height: 120px;
+            border-bottom: 2px solid #666666;
+            margin-bottom: 8px;
+        }
+
+        .trello-row:first-child {
+            border-top: 2px solid #666666;
+            padding-top: 0;
+        }
+
+        .trello-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .trello-cell {
+            background: #2a2a2a;
+            padding: 12px;
+            min-height: 100px;
+            position: relative;
+        }
+
+        .trello-cell.design-input {
+            background: #383838;
+        }
+
+        .trello-cell.validation {
+            background: #2a2a3a;
+        }
+
+        .cards-container {
+            min-height: 80px;
+            position: relative;
+        }
+
+        .trello-card {
+            background: #2b2b2b;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 6px;
+            border: 1px solid #6666666f;
+            cursor: grab;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .trello-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .trello-card.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+            transform: rotate(3deg);
+            z-index: 1000;
+        }
+
+        .drop-zone {
+            min-height: 40px;
+            border: 2px dashed transparent;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            margin: 4px 0;
+            position: absolute;
+            bottom: 0;
+            left: 12px;
+            right: 12px;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.1);
+        }
+
         @media (max-width: 768px) {
+            .trello-board {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .trello-column {
+                width: 100%;
+                min-width: auto;
+            }
             .app-layout {
                 flex-direction: column;
             }
@@ -590,146 +707,144 @@
             </div>
         </div>
 
-        <!-- Matrix Table -->
+        <!-- Traceability Board -->
         <div class="matrix-container">
             <div class="matrix-header">
-                <div class="showing-info">Showing 3 rows</div>
+                <div class="showing-info">Traceability Board - Drag cards between columns</div>
                 <div class="pagination">
-                    Rows: 50 ▼ &nbsp;&nbsp;&nbsp; 1 - 3 of 3 &nbsp; ‹ ›
+                    6 cards total &nbsp; ‹ ›
                 </div>
             </div>
 
-            <table class="matrix-table">
-                <thead>
-                    <tr>
-                        <th style="width: 33.33%;">Use cases</th>
-                        <th style="width: 33.33%;">Design input</th>
-                        <th style="width: 33.33%;">Validation test</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Row 1: Test Cases without execution -->
-                    <tr>
-                        <td class="empty-cell">
-                            <div class="cell-content"></div>
-                        </td>
-                        <td class="design-input-cell">
-                            <div class="cell-content">
-                            </div>
-                        </td>
-                        <td class="validation-cell">
-                            <div class="cell-content">
-                                <div class="test-case">
-                                    <div class="test-case-header">
-                                        <div class="test-case-left">
-                                            <span class="test-case-badge badge-tc">TC</span>
-                                            <div class="test-case-title">Measure heart rate at rest</div>
-                                        </div>
-                                        <span class="test-case-id">FIT-3</span>
-                                    </div>
-                                    <div class="status-badge status-manual">1 Manual Test Execution</div>
-                                </div>
-                                <div class="test-case">
-                                    <div class="test-case-header">
-                                        <div class="test-case-left">
-                                            <span class="test-case-badge badge-tc">TC</span>
-                                            <div class="test-case-title">Measure heart rate at running</div>
-                                        </div>
-                                        <span class="test-case-id">FIT-4</span>
-                                    </div>
-                                    <div class="status-badge status-manual">1 Manual Test Execution</div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
+            <div class="trello-board">
+                <!-- Header Row -->
+                <div class="board-header-row">
+                    <div class="column-header">
+                        <h3 class="column-title">Use Cases</h3>
+                    </div>
+                    <div class="column-header">
+                        <h3 class="column-title">Design Input</h3>
+                    </div>
+                    <div class="column-header">
+                        <h3 class="column-title">Validation Test</h3>
+                    </div>
+                </div>
 
-
-                    <!-- Row 2: Ensure fit of device on paws -->
-                    <tr>
-                        <td class="empty-cell">
-                            <div class="cell-content"></div>
-                        </td>
-                        <td class="design-input-cell">
-                            <div class="cell-content">
-                                <div class="test-case">
-                                    <div class="test-case-header">
-                                        <div class="test-case-left">
-                                            <span class="test-case-badge badge-rq">RQ</span>
-                                            <div class="test-case-title">Ensure fit of device on paws</div>
-                                        </div>
-                                        <span class="test-case-id">FIT-1</span>
+                <!-- Row 1: FIT-1 - Ensure fit of device on paws -->
+                <div class="trello-row">
+                    <div class="trello-cell" data-list="use-cases">
+                        <div class="cards-container">
+                            <div class="drop-zone"></div>
+                        </div>
+                    </div>
+                    <div class="trello-cell design-input" data-list="design-input">
+                        <div class="cards-container">
+                            <div class="trello-card" draggable="true" data-card-id="fit-1">
+                                <div class="test-case-header">
+                                    <div class="test-case-left">
+                                        <span class="test-case-badge badge-rq">RQ</span>
+                                        <div class="test-case-title">Ensure fit of device on paws</div>
                                     </div>
-                                    <div class="status-badge status-approved">Missing approval</div>
+                                    <span class="test-case-id">FIT-1</span>
                                 </div>
+                                <div class="status-badge status-approved">Missing approval</div>
                             </div>
-                        </td>
-                        <td class="validation-cell">
-                            <div class="cell-content">
-                                <div class="test-case">
-                                    <div class="test-case-header">
-                                        <div class="test-case-left">
-                                            <span class="test-case-badge badge-tc">TC</span>
-                                            <div class="test-case-title">Fits on large paws</div>
-                                        </div>
-                                        <span class="test-case-id">FIT-5</span>
+                            <div class="drop-zone"></div>
+                        </div>
+                    </div>
+                    <div class="trello-cell validation" data-list="validation-test">
+                        <div class="cards-container">
+                            <div class="trello-card" draggable="true" data-card-id="fit-5">
+                                <div class="test-case-header">
+                                    <div class="test-case-left">
+                                        <span class="test-case-badge badge-tc">TC</span>
+                                        <div class="test-case-title">Fits on large paws</div>
                                     </div>
-                                    <div class="status-badge status-manual">1 Manual Test Execution</div>
+                                    <span class="test-case-id">FIT-5</span>
                                 </div>
-                                <div class="test-case">
-                                    <div class="test-case-header">
-                                        <div class="test-case-left">
-                                            <span class="test-case-badge badge-tc">TC</span>
-                                            <div class="test-case-title">Fits on small paws</div>
-                                        </div>
-                                        <span class="test-case-id">FIT-6</span>
+                                <div class="status-badge status-manual">1 Manual Test Execution</div>
+                            </div>
+                            <div class="trello-card" draggable="true" data-card-id="fit-6">
+                                <div class="test-case-header">
+                                    <div class="test-case-left">
+                                        <span class="test-case-badge badge-tc">TC</span>
+                                        <div class="test-case-title">Fits on small paws</div>
                                     </div>
-                                    <div class="status-badge status-manual">1 Manual Test Execution</div>
+                                    <span class="test-case-id">FIT-6</span>
                                 </div>
+                                <div class="status-badge status-manual">1 Manual Test Execution</div>
                             </div>
-                        </td>
-                    </tr>
+                            <div class="drop-zone"></div>
+                        </div>
+                    </div>
+                </div>
 
-
-                    <!-- Row 3: Measure heart rate of user -->
-                    <tr>
-                        <td class="empty-cell">
-                            <div class="cell-content"></div>
-                        </td>
-                        <td class="design-input-cell">
-                            <div class="cell-content">
-                                <div class="test-case">
-                                    <div class="test-case-header">
-                                        <div class="test-case-left">
-                                            <span class="test-case-badge badge-rq">RQ</span>
-                                            <div class="test-case-title">Measure heart rate of user</div>
-                                        </div>
-                                        <span class="test-case-id">FIT-2</span>
+                <!-- Row 2: FIT-2 - Measure heart rate of user -->
+                <div class="trello-row">
+                    <div class="trello-cell" data-list="use-cases">
+                        <div class="cards-container">
+                            <div class="drop-zone"></div>
+                        </div>
+                    </div>
+                    <div class="trello-cell design-input" data-list="design-input">
+                        <div class="cards-container">
+                            <div class="trello-card" draggable="true" data-card-id="fit-2">
+                                <div class="test-case-header">
+                                    <div class="test-case-left">
+                                        <span class="test-case-badge badge-rq">RQ</span>
+                                        <div class="test-case-title">Measure heart rate of user</div>
                                     </div>
-                                    <div class="status-badge status-missing">Validation test case missing</div>
+                                    <span class="test-case-id">FIT-2</span>
                                 </div>
+                                <div class="status-badge status-missing">Validation test case missing</div>
                             </div>
-                        </td>
-                        <td class="empty-cell">
-                            <div class="cell-content"></div>
-                        </td>
-                    </tr>
+                            <div class="drop-zone"></div>
+                        </div>
+                    </div>
+                    <div class="trello-cell validation" data-list="validation-test">
+                        <div class="cards-container">
+                            <div class="drop-zone"></div>
+                        </div>
+                    </div>
+                </div>
 
-                    <!-- Final Alert Row -->
-                    <tr class="alert-row">
-                        <td colspan="3">
-                            <div class="alert-content">
-                                <span class="alert-text">1 Design input not covered by a validation test.</span>
-                                <button class="btn" style="border: none; background: transparent; color: inherit;">⚙</button>
+                <!-- Row 3: Heart rate tests -->
+                <div class="trello-row">
+                    <div class="trello-cell" data-list="use-cases">
+                        <div class="cards-container">
+                            <div class="drop-zone"></div>
+                        </div>
+                    </div>
+                    <div class="trello-cell design-input" data-list="design-input">
+                        <div class="cards-container">
+                            <div class="drop-zone"></div>
+                        </div>
+                    </div>
+                    <div class="trello-cell validation" data-list="validation-test">
+                        <div class="cards-container">
+                            <div class="trello-card" draggable="true" data-card-id="fit-3">
+                                <div class="test-case-header">
+                                    <div class="test-case-left">
+                                        <span class="test-case-badge badge-tc">TC</span>
+                                        <div class="test-case-title">Measure heart rate at rest</div>
+                                    </div>
+                                    <span class="test-case-id">FIT-3</span>
+                                </div>
+                                <div class="status-badge status-manual">1 Manual Test Execution</div>
                             </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="matrix-header" style="margin-top: 20px; margin-bottom: 0;">
-                <div class="showing-info">Showing 3 rows</div>
-                <div class="pagination">
-                    Rows: 50 ▼ &nbsp;&nbsp;&nbsp; 1 - 3 of 3 &nbsp; ‹ ›
+                            <div class="trello-card" draggable="true" data-card-id="fit-4">
+                                <div class="test-case-header">
+                                    <div class="test-case-left">
+                                        <span class="test-case-badge badge-tc">TC</span>
+                                        <div class="test-case-title">Measure heart rate at running</div>
+                                    </div>
+                                    <span class="test-case-id">FIT-4</span>
+                                </div>
+                                <div class="status-badge status-manual">1 Manual Test Execution</div>
+                            </div>
+                            <div class="drop-zone"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -738,8 +853,120 @@
     </div>
 
     <script>
-        // Simple interactive functionality
+        let draggedCard = null;
+
+        // Initialize drag and drop functionality
+        function initializeDragAndDrop() {
+            const cards = document.querySelectorAll('.trello-card');
+            const dropZones = document.querySelectorAll('.drop-zone');
+            const cardsContainers = document.querySelectorAll('.cards-container');
+
+            // Add event listeners to existing cards
+            cards.forEach(card => {
+                addCardEventListeners(card);
+            });
+
+            // Add event listeners to drop zones
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('drop', handleDrop);
+                zone.addEventListener('dragenter', handleDragEnter);
+                zone.addEventListener('dragleave', handleDragLeave);
+            });
+
+            // Add event listeners to cards containers
+            cardsContainers.forEach(container => {
+                container.addEventListener('dragover', handleDragOver);
+                container.addEventListener('drop', handleDrop);
+            });
+        }
+
+        function addCardEventListeners(card) {
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('dragend', handleDragEnd);
+        }
+
+        function handleDragStart(e) {
+            draggedCard = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.outerHTML);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            draggedCard = null;
+            updateCardCounts();
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            if (this.classList.contains('drop-zone')) {
+                this.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            if (this.classList.contains('drop-zone')) {
+                this.classList.remove('drag-over');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            
+            if (this.classList.contains('drop-zone')) {
+                this.classList.remove('drag-over');
+            }
+
+            if (draggedCard) {
+                // Find the target container
+                let targetContainer;
+                if (this.classList.contains('drop-zone')) {
+                    targetContainer = this.parentElement;
+                } else if (this.classList.contains('cards-container')) {
+                    targetContainer = this;
+                }
+
+                if (targetContainer) {
+                    // Remove the card from its current position
+                    draggedCard.remove();
+                    
+                    // Insert the card in the new position
+                    if (this.classList.contains('drop-zone')) {
+                        targetContainer.insertBefore(draggedCard, this);
+                    } else {
+                        // Insert at the end before the drop zone
+                        const dropZone = targetContainer.querySelector('.drop-zone');
+                        targetContainer.insertBefore(draggedCard, dropZone);
+                    }
+
+                    // Re-add event listeners
+                    addCardEventListeners(draggedCard);
+                    updateCardCounts();
+                }
+            }
+        }
+
+        function updateCardCounts() {
+            const columns = document.querySelectorAll('.trello-column');
+            columns.forEach(column => {
+                const cards = column.querySelectorAll('.trello-card');
+                const countElement = column.querySelector('.card-count');
+                countElement.textContent = cards.length;
+            });
+        }
+
+        // Initialize everything when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
+            initializeDragAndDrop();
+            updateCardCounts();
+
             // Make dropdowns functional
             const dropdowns = document.querySelectorAll('.dropdown');
             dropdowns.forEach(dropdown => {
@@ -750,10 +977,12 @@
 
             // Make search functional
             const searchInput = document.querySelector('.search-input');
-            searchInput.addEventListener('input', function() {
-                console.log('Search:', this.value);
-                // In a real app, this would filter the table
-            });
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    console.log('Search:', this.value);
+                    // In a real app, this would filter the cards
+                });
+            }
 
             // Make buttons functional
             const buttons = document.querySelectorAll('.btn');
