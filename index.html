@@ -299,7 +299,7 @@
             padding: 8px;
             margin-bottom: 6px;
             border-left: 3px solid #8b5cf6;
-            border: 1px solid #666666;
+            border: 1px solid #6666666f;
         }
 
         .test-case:last-child {
@@ -365,6 +365,11 @@
         .status-approved {
             background: #594500;
             color: #fed7aa;
+        }
+
+        .status-manual {
+            background: #6b7280;
+            color: #e5e7eb;
         }
 
         .alert-row {
@@ -610,16 +615,6 @@
                         </td>
                         <td class="design-input-cell">
                             <div class="cell-content">
-                                <div class="test-case">
-                                    <div class="test-case-header">
-                                        <div class="test-case-left">
-                                            <span class="test-case-badge badge-rq">RQ</span>
-                                            <div class="test-case-title">Ensure fit of device on paws</div>
-                                        </div>
-                                        <span class="test-case-id">FIT-1</span>
-                                    </div>
-                                    <div class="status-badge status-approved">Missing approval</div>
-                                </div>
                             </div>
                         </td>
                         <td class="validation-cell">
@@ -632,7 +627,7 @@
                                         </div>
                                         <span class="test-case-id">FIT-3</span>
                                     </div>
-                                    <div class="status-badge status-missing">Test execution missing</div>
+                                    <div class="status-badge status-manual">1 Manual Test Execution</div>
                                 </div>
                                 <div class="test-case">
                                     <div class="test-case-header">
@@ -642,41 +637,12 @@
                                         </div>
                                         <span class="test-case-id">FIT-4</span>
                                     </div>
-                                    <div class="status-badge status-missing">Test execution missing</div>
-                                </div>
-                                <div class="test-case">
-                                    <div class="test-case-header">
-                                        <div class="test-case-left">
-                                            <span class="test-case-badge badge-tc">TC</span>
-                                            <div class="test-case-title">Fits on large paws</div>
-                                        </div>
-                                        <span class="test-case-id">FIT-5</span>
-                                    </div>
-                                    <div class="status-badge status-missing">Test execution missing</div>
-                                </div>
-                                <div class="test-case">
-                                    <div class="test-case-header">
-                                        <div class="test-case-left">
-                                            <span class="test-case-badge badge-tc">TC</span>
-                                            <div class="test-case-title">Fits on small paws</div>
-                                        </div>
-                                        <span class="test-case-id">FIT-6</span>
-                                    </div>
-                                    <div class="status-badge status-missing">Test execution missing</div>
+                                    <div class="status-badge status-manual">1 Manual Test Execution</div>
                                 </div>
                             </div>
                         </td>
                     </tr>
 
-                    <!-- Alert Row -->
-                    <tr class="alert-row">
-                        <td colspan="3">
-                            <div class="alert-content">
-                                <span class="alert-text">2 Test Cases without a test execution.</span>
-                                <button class="btn" style="border: none; background: transparent; color: inherit;">⚙</button>
-                            </div>
-                        </td>
-                    </tr>
 
                     <!-- Row 2: Ensure fit of device on paws -->
                     <tr>
@@ -707,7 +673,7 @@
                                         </div>
                                         <span class="test-case-id">FIT-5</span>
                                     </div>
-                                    <div class="status-badge status-missing">Test execution missing</div>
+                                    <div class="status-badge status-manual">1 Manual Test Execution</div>
                                 </div>
                                 <div class="test-case">
                                     <div class="test-case-header">
@@ -717,21 +683,12 @@
                                         </div>
                                         <span class="test-case-id">FIT-6</span>
                                     </div>
-                                    <div class="status-badge status-missing">Test execution missing</div>
+                                    <div class="status-badge status-manual">1 Manual Test Execution</div>
                                 </div>
                             </div>
                         </td>
                     </tr>
 
-                    <!-- Alert Row 2 -->
-                    <tr class="alert-row">
-                        <td colspan="3">
-                            <div class="alert-content">
-                                <span class="alert-text">2 Test Cases without a test execution. 1 Item not fully approved yet.</span>
-                                <button class="btn" style="border: none; background: transparent; color: inherit;">⚙</button>
-                            </div>
-                        </td>
-                    </tr>
 
                     <!-- Row 3: Measure heart rate of user -->
                     <tr>
