@@ -385,6 +385,33 @@
             display: none;
         }
 
+        .suggest-controls.suggesting .suggest-btn {
+            position: relative;
+            color: rgba(226, 232, 240, 0.8);
+            background: rgba(79, 70, 229, 0.25);
+            border-color: rgba(79, 70, 229, 0.35);
+            pointer-events: none;
+        }
+
+        .suggest-controls.suggesting .suggest-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 14px;
+            height: 14px;
+            margin: -7px 0 0 -7px;
+            border-radius: 50%;
+            border: 2px solid rgba(79, 70, 229, 0.4);
+            border-top-color: rgba(79, 70, 229, 0.95);
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         .status-missing {
             background: #740238;
             color: #e9d5ff;
@@ -404,8 +431,8 @@
             padding: 4px 10px;
             border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            color: #f5f3ff;
+            background: linear-gradient(135deg, #2196f3, #64b5f6);
+            color: #e3f2fd;
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
@@ -423,8 +450,8 @@
         }
 
         .btn-reset {
-            background: linear-gradient(135deg, #ef4444, #f97316);
-            border-color: rgba(248, 113, 113, 0.5);
+            background: linear-gradient(135deg, #4b4b4b5c, #6b6b6b71);
+            border-color: rgba(90, 90, 90, 0.5);
             color: #fff0f0;
             font-weight: 600;
         }
@@ -1042,6 +1069,16 @@
                                 </div>
                                 <div class="status-badge status-manual">1 Manual Test Execution</div>
                             </div>
+                            <div class="trello-card" draggable="true" data-card-id="fit-7">
+                                <div class="test-case-header">
+                                    <div class="test-case-left">
+                                        <span class="test-case-badge badge-tc">TC</span>
+                                        <div class="test-case-title">Log resting heart rate for archival</div>
+                                    </div>
+                                    <span class="test-case-id">FIT-7</span>
+                                </div>
+                                <div class="status-badge status-manual">Not linked to requirement</div>
+                            </div>
                             <div class="drop-zone"></div>
                         </div>
                     </div>
@@ -1063,7 +1100,8 @@
             'fit-3': { rowKey: 'row-extra', list: 'validation-test', parentRq: null },
             'fit-4': { rowKey: 'row-extra', list: 'validation-test', parentRq: null },
             'fit-5': { rowKey: 'row-fit-1', list: 'validation-test', parentRq: 'FIT-1' },
-            'fit-6': { rowKey: 'row-fit-1', list: 'validation-test', parentRq: 'FIT-1' }
+            'fit-6': { rowKey: 'row-fit-1', list: 'validation-test', parentRq: 'FIT-1' },
+            'fit-7': { rowKey: 'row-extra', list: 'validation-test', parentRq: null }
         };
         const suggestionCandidates = {
             'FIT-2': ['fit-3', 'fit-4']
@@ -1446,19 +1484,41 @@
         }
 
         function handleSuggestClick(cardId) {
+            const controls = document.querySelector(`.suggest-controls[data-card-id="${cardId}"]`);
+            if (controls && controls.classList.contains('suggesting')) {
+                return;
+            }
+            if (controls) {
+                controls.classList.remove('active');
+                controls.classList.add('suggesting');
+            }
+
+            setTimeout(() => {
+                const success = applySuggestion(cardId);
+                const updatedControls = document.querySelector(`.suggest-controls[data-card-id="${cardId}"]`);
+                if (updatedControls) {
+                    updatedControls.classList.remove('suggesting');
+                    if (!success) {
+                        updatedControls.classList.remove('active');
+                    }
+                }
+            }, 500);
+        }
+
+        function applySuggestion(cardId) {
             const rqCard = document.querySelector(`.trello-card[data-card-id="${cardId}"]`);
             if (!rqCard) {
-                return;
+                return false;
             }
 
             const rqId = rqCard.getAttribute('data-rq-id');
             if (!rqId) {
-                return;
+                return false;
             }
 
             const rqRow = rqCard.closest('.trello-row');
             if (!rqRow) {
-                return;
+                return false;
             }
 
             const controls = document.querySelector(`.suggest-controls[data-card-id="${cardId}"]`);
@@ -1469,7 +1529,7 @@
             const targetCell = rqRow.querySelector('.trello-cell[data-list="validation-test"]');
             const targetContainer = targetCell ? targetCell.querySelector('.cards-container') : null;
             if (!targetContainer) {
-                return;
+                return false;
             }
 
             let tcCards = Array.from(document.querySelectorAll(`.trello-card[data-parent-rq="${rqId}"]`));
@@ -1483,11 +1543,7 @@
                 if (controls) {
                     controls.classList.add('active');
                 }
-                return;
-            }
-
-            if (controls) {
-                controls.classList.add('active');
+                return false;
             }
 
             console.groupCollapsed(`Suggest clicked for ${cardId}`);
@@ -1539,9 +1595,14 @@
             refreshRelationships();
             updateCardCounts();
 
+            if (controls) {
+                controls.classList.add('active');
+            }
+
             console.log('Target container cards after move:', targetContainer.querySelectorAll('.trello-card').length);
             console.log('Pending suggestion snapshot:', pendingSuggestions[cardId]);
             console.groupEnd();
+            return true;
         }
 
         function handleAcceptSuggestion(cardId) {
@@ -1553,6 +1614,16 @@
             delete pendingSuggestions[cardId];
             clearAllSuggestionDiffs();
             clearAllGhosts();
+            if (cardId === 'fit-2') {
+                const card = document.querySelector(`.trello-card[data-card-id="${cardId}"]`);
+                const statusRow = card?.querySelector('.status-row');
+                if (statusRow) {
+                    const badge = document.createElement('div');
+                    badge.className = 'status-badge status-approved';
+                    badge.textContent = 'Missing approval';
+                    statusRow.replaceWith(badge);
+                }
+            }
             saveBoardState();
         }
 
@@ -1817,6 +1888,9 @@
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
+                    if (this.closest('.suggest-controls')?.classList.contains('suggesting')) {
+                        return;
+                    }
                     handleSuggestClick(this.dataset.cardId);
                 });
             });
@@ -1839,6 +1913,9 @@
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
+                    if (this.closest('.suggest-controls')?.classList.contains('suggesting')) {
+                        return;
+                    }
                     handleRejectSuggestion(this.dataset.cardId);
                 });
             });
