@@ -357,6 +357,34 @@
             font-weight: 500;
         }
 
+        .status-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+
+        .suggest-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .suggest-decision {
+            display: none;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .suggest-controls.active .suggest-decision {
+            display: inline-flex;
+        }
+
+        .suggest-controls.active .suggest-btn {
+            display: none;
+        }
+
         .status-missing {
             background: #740238;
             color: #e9d5ff;
@@ -370,6 +398,106 @@
         .status-manual {
             background: #6b7280;
             color: #e5e7eb;
+        }
+
+        .suggest-btn {
+            padding: 4px 10px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: #f5f3ff;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .suggest-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.35);
+        }
+
+        .suggest-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #ef4444, #f97316);
+            border-color: rgba(248, 113, 113, 0.5);
+            color: #fff0f0;
+            font-weight: 600;
+        }
+
+        .btn-reset:hover {
+            background: linear-gradient(135deg, #f97316, #fb923c);
+        }
+
+        .suggest-action-btn {
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(17, 24, 39, 0.6);
+            color: #f9fafb;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+        }
+
+        .suggest-action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(17, 24, 39, 0.35);
+        }
+
+        .suggest-accept {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: rgba(34, 197, 94, 0.4);
+            color: #bbf7d0;
+        }
+
+        .suggest-accept:hover {
+            background: rgba(34, 197, 94, 0.3);
+        }
+
+        .suggest-reject {
+            background: rgba(248, 113, 113, 0.2);
+            border-color: rgba(248, 113, 113, 0.4);
+            color: #fecaca;
+        }
+
+        .suggest-reject:hover {
+            background: rgba(248, 113, 113, 0.3);
+        }
+
+        .change-highlight {
+            position: relative;
+            filter: saturate(0.85) brightness(0.95);
+        }
+
+        .trello-card.change-added::after,
+        .trello-card.change-removed::after,
+        .cards-container.change-added::after,
+        .cards-container.change-removed::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        .trello-card.change-added::after,
+        .cards-container.change-added::after {
+            background: rgba(34, 197, 94, 0.25);
+        }
+
+        .trello-card.change-removed::after,
+        .cards-container.change-removed::after {
+            background: rgba(239, 68, 68, 0.25);
         }
 
         .alert-row {
@@ -717,6 +845,7 @@
                 </select>
                 <button class="btn">Download ↓</button>
                 <input type="search" class="search-input" placeholder="Search...">
+                <button class="btn btn-reset" type="button" id="resetBoardBtn">Reset</button>
             </div>
         </div>
 
@@ -789,7 +918,7 @@
                 </div>
 
                 <!-- Row 1: FIT-1 - Ensure fit of device on paws -->
-                <div class="trello-row">
+                <div class="trello-row" data-row-key="row-fit-1">
                     <div class="trello-cell" data-list="use-cases">
                         <div class="cards-container">
                             <div class="drop-zone"></div>
@@ -839,7 +968,7 @@
                 </div>
 
                 <!-- Row 2: FIT-2 - Measure heart rate of user -->
-                <div class="trello-row">
+                <div class="trello-row" data-row-key="row-fit-2">
                     <div class="trello-cell" data-list="use-cases">
                         <div class="cards-container">
                             <div class="drop-zone"></div>
@@ -855,7 +984,16 @@
                                     </div>
                                     <span class="test-case-id">FIT-2</span>
                                 </div>
-                                <div class="status-badge status-missing">Validation test case missing</div>
+                                <div class="status-row">
+                                    <div class="status-badge status-missing">Validation test case missing</div>
+                                    <div class="suggest-controls" data-card-id="fit-2">
+                                        <button class="suggest-btn" type="button" data-card-id="fit-2">Suggest</button>
+                                        <div class="suggest-decision" data-card-id="fit-2">
+                                            <button class="suggest-action-btn suggest-accept" type="button" data-card-id="fit-2">Accept</button>
+                                            <button class="suggest-action-btn suggest-reject" type="button" data-card-id="fit-2">Reject</button>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="relationship-indicator hidden"></div>
                             </div>
                             <div class="drop-zone"></div>
@@ -869,7 +1007,7 @@
                 </div>
 
                 <!-- Row 3: Heart rate tests -->
-                <div class="trello-row">
+                <div class="trello-row" data-row-key="row-extra">
                     <div class="trello-cell" data-list="use-cases">
                         <div class="cards-container">
                             <div class="drop-zone"></div>
@@ -882,7 +1020,7 @@
                     </div>
                     <div class="trello-cell validation" data-list="validation-test">
                         <div class="cards-container">
-                            <div class="trello-card" draggable="true" data-card-id="fit-3" data-parent-rq="FIT-2">
+                            <div class="trello-card" draggable="true" data-card-id="fit-3">
                                 <div class="test-case-header">
                                     <div class="test-case-left">
                                         <span class="test-case-badge badge-tc">TC</span>
@@ -892,7 +1030,7 @@
                                 </div>
                                 <div class="status-badge status-manual">1 Manual Test Execution</div>
                             </div>
-                            <div class="trello-card" draggable="true" data-card-id="fit-4" data-parent-rq="FIT-2">
+                            <div class="trello-card" draggable="true" data-card-id="fit-4">
                                 <div class="test-case-header">
                                     <div class="test-case-left">
                                         <span class="test-case-badge badge-tc">TC</span>
@@ -915,6 +1053,56 @@
 
     <script>
         let draggedCard = null;
+        const RELATIONSHIPS_KEY = 'ketryxTraceabilityRelationships';
+        const pendingSuggestions = {};
+        const defaultState = {
+            'fit-1': { rowKey: 'row-fit-1', list: 'design-input', parentRq: null },
+            'fit-2': { rowKey: 'row-fit-2', list: 'design-input', parentRq: null },
+            'fit-3': { rowKey: 'row-extra', list: 'validation-test', parentRq: null },
+            'fit-4': { rowKey: 'row-extra', list: 'validation-test', parentRq: null },
+            'fit-5': { rowKey: 'row-fit-1', list: 'validation-test', parentRq: 'FIT-1' },
+            'fit-6': { rowKey: 'row-fit-1', list: 'validation-test', parentRq: 'FIT-1' }
+        };
+
+        function resetBoardState() {
+            Object.keys(pendingSuggestions).forEach(key => delete pendingSuggestions[key]);
+
+            document.querySelectorAll('.change-added, .change-removed').forEach(el => {
+                el.classList.remove('change-added', 'change-removed');
+            });
+            document.querySelectorAll('.change-highlight').forEach(el => {
+                el.classList.remove('change-highlight');
+            });
+
+            Object.entries(defaultState).forEach(([cardId, info]) => {
+                const card = document.querySelector(`.trello-card[data-card-id="${cardId}"]`);
+                if (!card) {
+                    return;
+                }
+
+                if (info.parentRq) {
+                    card.setAttribute('data-parent-rq', info.parentRq);
+                } else {
+                    card.removeAttribute('data-parent-rq');
+                }
+
+                placeCard(card, info.rowKey, info.list);
+            });
+
+            document.querySelectorAll('.suggest-controls').forEach(ctrl => ctrl.classList.remove('active'));
+
+            updateAllDropZonePositions();
+            refreshRelationships();
+            updateCardCounts();
+
+            try {
+                localStorage.removeItem(RELATIONSHIPS_KEY);
+            } catch (err) {
+                console.warn('Unable to clear stored board state:', err);
+            }
+            console.info('Board reset requested — reloading default layout');
+            window.location.reload();
+        }
 
         // Initialize drag and drop functionality
         function initializeDragAndDrop() {
@@ -1127,6 +1315,7 @@
                         // Update drop zone positions in all cells
                         updateAllDropZonePositions();
                         refreshRelationships();
+                        saveBoardState();
                     }
                     // If invalid drop target, card will snap back to original position
                 }
@@ -1147,6 +1336,349 @@
                 const countElement = column.querySelector('.card-count');
                 if (countElement) {
                     countElement.textContent = cards.length;
+                }
+            });
+        }
+
+        function applyChangeHighlight(element, className) {
+            if (!element) {
+                return;
+            }
+
+            element.classList.add('change-highlight', className);
+
+            setTimeout(() => {
+                element.classList.remove(className);
+                if (!element.classList.contains('change-added') && !element.classList.contains('change-removed')) {
+                    element.classList.remove('change-highlight');
+                }
+            }, 1600);
+        }
+
+        function getCardPlacement(card) {
+            const row = card.closest('.trello-row');
+            const cell = card.closest('.trello-cell');
+            return {
+                rowKey: row ? row.dataset.rowKey || null : null,
+                list: cell ? cell.dataset.list || null : null
+            };
+        }
+
+        function placeCard(card, rowKey, list) {
+            if (!rowKey) {
+                return;
+            }
+
+            const row = document.querySelector(`.trello-row[data-row-key="${rowKey}"]`);
+            if (!row) {
+                return;
+            }
+
+            let targetList = list;
+            const cardType = card.querySelector('.test-case-badge')?.textContent.trim();
+            if (cardType === 'TC') {
+                targetList = 'validation-test';
+            }
+
+            const cell = row.querySelector(`.trello-cell[data-list="${targetList}"]`) || row.querySelector('.trello-cell[data-list="validation-test"]');
+            const container = cell ? cell.querySelector('.cards-container') : null;
+
+            if (!container) {
+                return;
+            }
+
+            const dropZone = container.querySelector('.drop-zone');
+            if (dropZone) {
+                container.insertBefore(card, dropZone);
+            } else {
+                container.appendChild(card);
+            }
+
+            updateDropZonePosition(cell);
+        }
+
+        function handleSuggestClick(cardId) {
+            const rqCard = document.querySelector(`.trello-card[data-card-id="${cardId}"]`);
+            if (!rqCard) {
+                return;
+            }
+
+            const rqId = rqCard.getAttribute('data-rq-id');
+            if (!rqId) {
+                return;
+            }
+
+            const rqRow = rqCard.closest('.trello-row');
+            if (!rqRow) {
+                return;
+            }
+
+            const controls = document.querySelector(`.suggest-controls[data-card-id="${cardId}"]`);
+
+            const targetCell = rqRow.querySelector('.trello-cell[data-list="validation-test"]');
+            const targetContainer = targetCell ? targetCell.querySelector('.cards-container') : null;
+            if (!targetContainer) {
+                return;
+            }
+
+            const tcCards = Array.from(document.querySelectorAll(`.trello-card[data-parent-rq="${rqId}"]`));
+            if (tcCards.length === 0) {
+                if (controls) {
+                    controls.classList.add('active');
+                }
+                return;
+            }
+
+            if (controls) {
+                controls.classList.add('active');
+            }
+
+            console.groupCollapsed(`Suggest clicked for ${cardId}`);
+            console.log('Target row:', rqRow.dataset.rowKey);
+            console.log('Target container cards before move:', targetContainer.querySelectorAll('.trello-card').length);
+            console.log('Candidates to move:', tcCards.map(card => card.dataset.cardId));
+
+            pendingSuggestions[cardId] = {
+                movements: tcCards.map(tcCard => ({
+                    cardId: tcCard.getAttribute('data-card-id'),
+                    placement: getCardPlacement(tcCard)
+                }))
+            };
+
+            tcCards.forEach(tcCard => {
+                const currentContainer = tcCard.closest('.cards-container');
+                if (!currentContainer) {
+                    return;
+                }
+
+                const originCell = currentContainer.closest('.trello-cell');
+                const movingToNewContainer = currentContainer !== targetContainer;
+
+                if (movingToNewContainer) {
+                    applyChangeHighlight(currentContainer, 'change-removed');
+                }
+
+                tcCard.setAttribute('data-parent-rq', rqId);
+                const referenceNode = targetContainer.querySelector('.drop-zone') || targetContainer.firstChild;
+                if (referenceNode) {
+                    targetContainer.insertBefore(tcCard, referenceNode);
+                } else {
+                    targetContainer.appendChild(tcCard);
+                }
+
+                applyChangeHighlight(targetContainer, 'change-added');
+                applyChangeHighlight(tcCard, 'change-added');
+
+                if (originCell && movingToNewContainer) {
+                    updateDropZonePosition(originCell);
+                }
+
+                console.log(`Moved ${tcCard.dataset.cardId} from`, originCell?.dataset.list, 'to validation-test');
+            });
+
+            updateDropZonePosition(targetCell);
+            updateAllDropZonePositions();
+            refreshRelationships();
+            updateCardCounts();
+
+            console.log('Target container cards after move:', targetContainer.querySelectorAll('.trello-card').length);
+            console.log('Pending suggestion snapshot:', pendingSuggestions[cardId]);
+            console.groupEnd();
+        }
+
+        function handleAcceptSuggestion(cardId) {
+            const controls = document.querySelector(`.suggest-controls[data-card-id="${cardId}"]`);
+            if (controls) {
+                controls.classList.remove('active');
+            }
+            console.log(`Suggestion accepted for ${cardId}`);
+            delete pendingSuggestions[cardId];
+            saveBoardState();
+        }
+
+        function handleRejectSuggestion(cardId) {
+            const controls = document.querySelector(`.suggest-controls[data-card-id="${cardId}"]`);
+            if (controls) {
+                controls.classList.remove('active');
+            }
+            console.log(`Suggestion rejected for ${cardId}`);
+
+            const pending = pendingSuggestions[cardId];
+            if (!pending) {
+                console.warn('No pending suggestion recorded for', cardId);
+                return;
+            }
+
+            pending.movements.forEach(move => {
+                const tcCard = document.querySelector(`.trello-card[data-card-id="${move.cardId}"]`);
+                if (!tcCard) {
+                    return;
+                }
+
+                const currentContainer = tcCard.closest('.cards-container');
+                if (currentContainer) {
+                    applyChangeHighlight(currentContainer, 'change-removed');
+                }
+
+                placeCard(tcCard, move.placement.rowKey, move.placement.list);
+
+                const newContainer = tcCard.closest('.cards-container');
+                applyChangeHighlight(newContainer, 'change-added');
+                applyChangeHighlight(tcCard, 'change-added');
+            });
+
+            console.log('Suggestion reverted:', pending);
+
+            delete pendingSuggestions[cardId];
+
+            updateAllDropZonePositions();
+            refreshRelationships();
+            updateCardCounts();
+            saveBoardState();
+        }
+
+        function resetBoardState() {
+            Object.keys(pendingSuggestions).forEach(key => delete pendingSuggestions[key]);
+
+            document.querySelectorAll('.change-added, .change-removed').forEach(el => {
+                el.classList.remove('change-added', 'change-removed');
+            });
+            document.querySelectorAll('.change-highlight').forEach(el => {
+                el.classList.remove('change-highlight');
+            });
+
+            Object.entries(defaultState).forEach(([cardId, info]) => {
+                const card = document.querySelector(`.trello-card[data-card-id="${cardId}"]`);
+                if (!card) {
+                    return;
+                }
+
+                if (info.parentRq) {
+                    card.setAttribute('data-parent-rq', info.parentRq);
+                } else {
+                    card.removeAttribute('data-parent-rq');
+                }
+
+                placeCard(card, info.rowKey, info.list);
+            });
+
+            document.querySelectorAll('.suggest-controls').forEach(ctrl => ctrl.classList.remove('active'));
+
+            updateAllDropZonePositions();
+            refreshRelationships();
+            updateCardCounts();
+
+            try {
+                localStorage.removeItem(RELATIONSHIPS_KEY);
+            } catch (err) {
+                console.warn('Unable to clear stored board state:', err);
+            }
+            saveBoardState();
+            console.info('Board reset to default layout');
+        }
+
+        function saveBoardState() {
+            const state = {};
+            const cards = document.querySelectorAll('.trello-card[data-card-id]');
+
+            cards.forEach(card => {
+                const cardId = card.getAttribute('data-card-id');
+                const row = card.closest('.trello-row');
+                const cell = card.closest('.trello-cell');
+
+                state[cardId] = {
+                    rowKey: row ? row.dataset.rowKey || null : null,
+                    list: cell ? cell.dataset.list || null : null,
+                    parentRq: card.getAttribute('data-parent-rq') || null
+                };
+            });
+
+            Object.entries(pendingSuggestions).forEach(([rqCardId, data]) => {
+                state[rqCardId] = state[rqCardId] || {};
+                state[rqCardId].pendingMovements = data.movements;
+                state[rqCardId].rqCardId = rqCardId;
+            });
+
+            try {
+                localStorage.setItem(RELATIONSHIPS_KEY, JSON.stringify(state));
+            } catch (err) {
+                console.warn('Unable to save board state:', err);
+            }
+        }
+
+        function loadBoardState() {
+            let stored;
+            try {
+                stored = localStorage.getItem(RELATIONSHIPS_KEY);
+            } catch (err) {
+                console.warn('Unable to access board state:', err);
+                return;
+            }
+
+            if (!stored) {
+                return;
+            }
+
+            let state;
+            try {
+                state = JSON.parse(stored);
+            } catch (err) {
+                console.warn('Invalid board state data:', err);
+                return;
+            }
+
+            Object.entries(state).forEach(([cardId, info]) => {
+                const card = document.querySelector(`.trello-card[data-card-id="${cardId}"]`);
+                if (!card) {
+                    return;
+                }
+
+                if (info.parentRq) {
+                    card.setAttribute('data-parent-rq', info.parentRq);
+                } else {
+                    card.removeAttribute('data-parent-rq');
+                }
+
+                if (!info.rowKey) {
+                    return;
+                }
+
+                const row = document.querySelector(`.trello-row[data-row-key="${info.rowKey}"]`);
+                if (!row) {
+                    return;
+                }
+
+                let targetList = info.list;
+                if (!targetList) {
+                    targetList = card.querySelector('.test-case-badge')?.textContent.trim() === 'TC'
+                        ? 'validation-test'
+                        : 'design-input';
+                }
+
+                // Validation for TC cards
+                const cardType = card.querySelector('.test-case-badge')?.textContent.trim();
+                if (cardType === 'TC') {
+                    targetList = 'validation-test';
+                }
+
+                const cell = row.querySelector(`.trello-cell[data-list="${targetList}"]`) || row.querySelector('.trello-cell[data-list="validation-test"]');
+                const container = cell ? cell.querySelector('.cards-container') : null;
+
+                if (!container) {
+                    return;
+                }
+
+                const dropZone = container.querySelector('.drop-zone');
+                if (dropZone) {
+                    container.insertBefore(card, dropZone);
+                } else {
+                    container.appendChild(card);
+                }
+
+                if (info.pendingMovements) {
+                    pendingSuggestions[info.rqCardId] = {
+                        movements: info.pendingMovements
+                    };
                 }
             });
         }
@@ -1234,9 +1766,11 @@
         // Initialize everything when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             initializeDragAndDrop();
+            loadBoardState();
             updateCardCounts();
             updateAllDropZonePositions();
             refreshRelationships();
+            saveBoardState();
 
             // Make dropdowns functional
             const dropdowns = document.querySelectorAll('.dropdown');
@@ -1262,6 +1796,48 @@
                     console.log('Button clicked:', this.textContent);
                 });
             });
+
+            const suggestButtons = document.querySelectorAll('.suggest-btn');
+            suggestButtons.forEach(btn => {
+                btn.addEventListener('mousedown', e => e.stopPropagation(), { passive: false });
+                btn.addEventListener('touchstart', e => e.stopPropagation(), { passive: false });
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSuggestClick(this.dataset.cardId);
+                });
+            });
+
+            const acceptButtons = document.querySelectorAll('.suggest-accept');
+            acceptButtons.forEach(btn => {
+                btn.addEventListener('mousedown', e => e.stopPropagation(), { passive: false });
+                btn.addEventListener('touchstart', e => e.stopPropagation(), { passive: false });
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAcceptSuggestion(this.dataset.cardId);
+                });
+            });
+
+            const rejectButtons = document.querySelectorAll('.suggest-reject');
+            rejectButtons.forEach(btn => {
+                btn.addEventListener('mousedown', e => e.stopPropagation(), { passive: false });
+                btn.addEventListener('touchstart', e => e.stopPropagation(), { passive: false });
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleRejectSuggestion(this.dataset.cardId);
+                });
+            });
+
+            const resetBtn = document.getElementById('resetBoardBtn');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    resetBoardState();
+                });
+            }
 
             window.addEventListener('resize', refreshRelationships);
 
