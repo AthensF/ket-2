@@ -470,34 +470,36 @@
             background: rgba(248, 113, 113, 0.3);
         }
 
-        .change-highlight {
+        .suggest-diff {
             position: relative;
-            filter: saturate(0.85) brightness(0.95);
         }
 
-        .trello-card.change-added::after,
-        .trello-card.change-removed::after,
-        .cards-container.change-added::after,
-        .cards-container.change-removed::after {
+        .suggest-diff::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
+            width: 6px;
             height: 100%;
-            border-radius: inherit;
+            border-radius: 6px;
+            opacity: 0.85;
             pointer-events: none;
-            mix-blend-mode: screen;
         }
 
-        .trello-card.change-added::after,
-        .cards-container.change-added::after {
-            background: rgba(34, 197, 94, 0.25);
+        .suggest-diff-added::before {
+            background: linear-gradient(180deg, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.8));
         }
 
-        .trello-card.change-removed::after,
-        .cards-container.change-removed::after {
-            background: rgba(239, 68, 68, 0.25);
+        .suggest-diff-removed::before {
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.9), rgba(248, 113, 113, 0.8));
+        }
+
+        .suggest-ghost-card {
+            opacity: 0.35;
+            filter: saturate(0.6) brightness(0.9);
+            border: 1px dashed rgba(148, 163, 184, 0.6);
+            background: rgba(15, 23, 42, 0.25);
+            pointer-events: none;
         }
 
         .alert-row {
@@ -1063,16 +1065,62 @@
             'fit-5': { rowKey: 'row-fit-1', list: 'validation-test', parentRq: 'FIT-1' },
             'fit-6': { rowKey: 'row-fit-1', list: 'validation-test', parentRq: 'FIT-1' }
         };
+        const suggestionCandidates = {
+            'FIT-2': ['fit-3', 'fit-4']
+        };
+        const GHOST_ATTR = 'data-ghost-of';
+
+        function clearAllSuggestionDiffs() {
+            document.querySelectorAll('.suggest-diff').forEach(el => {
+                el.classList.remove('suggest-diff', 'suggest-diff-added', 'suggest-diff-removed');
+            });
+        }
+
+        function clearAllGhosts() {
+            document.querySelectorAll(`[${GHOST_ATTR}]`).forEach(el => el.remove());
+        }
+
+        function createGhostPlaceholder(container, card) {
+            if (!container || !card) {
+                return;
+            }
+
+            const existing = container.querySelector(`[${GHOST_ATTR}="${card.dataset.cardId || ''}"]`);
+            if (existing) {
+                return;
+            }
+
+            const ghost = card.cloneNode(true);
+            ghost.classList.add('suggest-ghost-card');
+            ghost.setAttribute(GHOST_ATTR, card.dataset.cardId || '');
+            ghost.setAttribute('draggable', 'false');
+            ghost.querySelectorAll('[draggable]').forEach(el => el.setAttribute('draggable', 'false'));
+
+            const dropZone = container.querySelector('.drop-zone');
+            if (dropZone) {
+                container.insertBefore(ghost, dropZone);
+            } else {
+                container.appendChild(ghost);
+            }
+        }
+
+        function markSuggestionDiff(element, type) {
+            if (!element) {
+                return;
+            }
+            element.classList.add('suggest-diff');
+            element.classList.remove('suggest-diff-added', 'suggest-diff-removed');
+            if (type === 'added') {
+                element.classList.add('suggest-diff-added');
+            } else if (type === 'removed') {
+                element.classList.add('suggest-diff-removed');
+            }
+        }
 
         function resetBoardState() {
             Object.keys(pendingSuggestions).forEach(key => delete pendingSuggestions[key]);
-
-            document.querySelectorAll('.change-added, .change-removed').forEach(el => {
-                el.classList.remove('change-added', 'change-removed');
-            });
-            document.querySelectorAll('.change-highlight').forEach(el => {
-                el.classList.remove('change-highlight');
-            });
+            clearAllSuggestionDiffs();
+            clearAllGhosts();
 
             Object.entries(defaultState).forEach(([cardId, info]) => {
                 const card = document.querySelector(`.trello-card[data-card-id="${cardId}"]`);
@@ -1415,13 +1463,22 @@
 
             const controls = document.querySelector(`.suggest-controls[data-card-id="${cardId}"]`);
 
+            clearAllSuggestionDiffs();
+            clearAllGhosts();
+
             const targetCell = rqRow.querySelector('.trello-cell[data-list="validation-test"]');
             const targetContainer = targetCell ? targetCell.querySelector('.cards-container') : null;
             if (!targetContainer) {
                 return;
             }
 
-            const tcCards = Array.from(document.querySelectorAll(`.trello-card[data-parent-rq="${rqId}"]`));
+            let tcCards = Array.from(document.querySelectorAll(`.trello-card[data-parent-rq="${rqId}"]`));
+            if (tcCards.length === 0) {
+                const fallbackIds = suggestionCandidates[rqId] || [];
+                tcCards = fallbackIds
+                    .map(id => document.querySelector(`.trello-card[data-card-id="${id}"]`))
+                    .filter(Boolean);
+            }
             if (tcCards.length === 0) {
                 if (controls) {
                     controls.classList.add('active');
@@ -1455,7 +1512,8 @@
                 const movingToNewContainer = currentContainer !== targetContainer;
 
                 if (movingToNewContainer) {
-                    applyChangeHighlight(currentContainer, 'change-removed');
+                    markSuggestionDiff(currentContainer, 'removed');
+                    createGhostPlaceholder(currentContainer, tcCard);
                 }
 
                 tcCard.setAttribute('data-parent-rq', rqId);
@@ -1466,8 +1524,8 @@
                     targetContainer.appendChild(tcCard);
                 }
 
-                applyChangeHighlight(targetContainer, 'change-added');
-                applyChangeHighlight(tcCard, 'change-added');
+                markSuggestionDiff(targetContainer, 'added');
+                markSuggestionDiff(tcCard, 'added');
 
                 if (originCell && movingToNewContainer) {
                     updateDropZonePosition(originCell);
@@ -1493,6 +1551,8 @@
             }
             console.log(`Suggestion accepted for ${cardId}`);
             delete pendingSuggestions[cardId];
+            clearAllSuggestionDiffs();
+            clearAllGhosts();
             saveBoardState();
         }
 
@@ -1515,16 +1575,7 @@
                     return;
                 }
 
-                const currentContainer = tcCard.closest('.cards-container');
-                if (currentContainer) {
-                    applyChangeHighlight(currentContainer, 'change-removed');
-                }
-
                 placeCard(tcCard, move.placement.rowKey, move.placement.list);
-
-                const newContainer = tcCard.closest('.cards-container');
-                applyChangeHighlight(newContainer, 'change-added');
-                applyChangeHighlight(tcCard, 'change-added');
             });
 
             console.log('Suggestion reverted:', pending);
@@ -1534,47 +1585,9 @@
             updateAllDropZonePositions();
             refreshRelationships();
             updateCardCounts();
+            clearAllSuggestionDiffs();
+            clearAllGhosts();
             saveBoardState();
-        }
-
-        function resetBoardState() {
-            Object.keys(pendingSuggestions).forEach(key => delete pendingSuggestions[key]);
-
-            document.querySelectorAll('.change-added, .change-removed').forEach(el => {
-                el.classList.remove('change-added', 'change-removed');
-            });
-            document.querySelectorAll('.change-highlight').forEach(el => {
-                el.classList.remove('change-highlight');
-            });
-
-            Object.entries(defaultState).forEach(([cardId, info]) => {
-                const card = document.querySelector(`.trello-card[data-card-id="${cardId}"]`);
-                if (!card) {
-                    return;
-                }
-
-                if (info.parentRq) {
-                    card.setAttribute('data-parent-rq', info.parentRq);
-                } else {
-                    card.removeAttribute('data-parent-rq');
-                }
-
-                placeCard(card, info.rowKey, info.list);
-            });
-
-            document.querySelectorAll('.suggest-controls').forEach(ctrl => ctrl.classList.remove('active'));
-
-            updateAllDropZonePositions();
-            refreshRelationships();
-            updateCardCounts();
-
-            try {
-                localStorage.removeItem(RELATIONSHIPS_KEY);
-            } catch (err) {
-                console.warn('Unable to clear stored board state:', err);
-            }
-            saveBoardState();
-            console.info('Board reset to default layout');
         }
 
         function saveBoardState() {
