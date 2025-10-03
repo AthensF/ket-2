@@ -3,10 +3,10 @@
 Linking objects should be much easier in the Ketryx app — this project is an example of how it should be done.
 
 Before
-![Demo](before.jpg)
+![Demo](before.gif)
 
 After
-![Demo](after.jpg)
+![Demo](after.gif)
 
 You can test it out here:
 https://athensf.github.io/ket-2/
